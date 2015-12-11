@@ -22,36 +22,24 @@ class TaskUtilsSpec extends SpecificationWithJUnit with Mockito {
       taskIdTwo must_== "ct:1420843781398:0:sample-name:"
     }
 
-    "Get job arguments for taskId" in {
-      val arguments = "-a 1 -b 2"
-      var taskId = "ct:1420843781398:0:test:" + arguments
-      val jobArguments = TaskUtils.getJobArgumentsForTaskId(taskId)
-
-      jobArguments must_== arguments
-    }
-
     "Parse taskId" in {
       val arguments = "-a 1 -b 2"
       val arguments2 = "-a 1:2 --B test"
 
       val taskIdOne = "ct:1420843781398:0:test:" + arguments
-      val (jobName, jobDue, attempt, jobArguments) = TaskUtils.parseTaskId(taskIdOne)
+      val (jobName, jobDue, attempt) = TaskUtils.parseTaskId(taskIdOne)
 
       jobName must_== "test"
       jobDue must_== 1420843781398L
       attempt must_== 0
-      jobArguments must_== arguments
 
       val taskIdTwo = "ct:1420843781398:0:test:" + arguments2
-      val (_, _, _, jobArguments2) = TaskUtils.parseTaskId(taskIdTwo)
-
-      jobArguments2 must_== arguments2
+      val (_, _, _) = TaskUtils.parseTaskId(taskIdTwo)
 
       val taskIdThree = "ct:1420843781398:0:test"
-      val (jobName3, _, _, jobArguments3) = TaskUtils.parseTaskId(taskIdThree)
+      val (jobName3, _, _) = TaskUtils.parseTaskId(taskIdThree)
 
       jobName3 must_== "test"
-      jobArguments3 must_== ""
     }
   }
 }

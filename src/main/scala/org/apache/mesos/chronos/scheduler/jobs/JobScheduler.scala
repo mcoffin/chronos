@@ -230,7 +230,7 @@ class JobScheduler @Inject()(val scheduleHorizon: Period,
       log.warning("Job '%s' no longer registered.".format(jobName))
     } else {
       val job = jobOption.get
-      val (_, _, attempt, _) = TaskUtils.parseTaskId(taskId)
+      val (_, _, attempt) = TaskUtils.parseTaskId(taskId)
       jobsObserver.apply(JobStarted(job, taskStatus, attempt))
 
       job match {
@@ -261,7 +261,7 @@ class JobScheduler @Inject()(val scheduleHorizon: Period,
     if (jobOption.isEmpty) {
       log.warning("Job '%s' no longer registered.".format(jobName))
     } else {
-      val (_, start, attempt, _) = TaskUtils.parseTaskId(taskId)
+      val (_, start, attempt) = TaskUtils.parseTaskId(taskId)
       jobMetrics.updateJobStat(jobName, timeMs = DateTime.now(DateTimeZone.UTC).getMillis - start)
       jobMetrics.updateJobStatus(jobName, success = true)
       val job = jobOption.get
@@ -346,7 +346,7 @@ class JobScheduler @Inject()(val scheduleHorizon: Period,
     if (!TaskUtils.isValidVersion(taskId)) {
       log.warning("Found old or invalid task, ignoring!")
     } else {
-      val (jobName, _, attempt, _) = TaskUtils.parseTaskId(taskId)
+      val (jobName, _, attempt) = TaskUtils.parseTaskId(taskId)
       log.warning("Task of job: %s failed.".format(jobName))
       val jobOption = jobGraph.lookupVertex(jobName)
       jobOption match {
@@ -437,7 +437,7 @@ class JobScheduler @Inject()(val scheduleHorizon: Period,
       return
     }
 
-    val (jobName, start, attempt, _) = TaskUtils.parseTaskId(taskId)
+    val (jobName, start, attempt) = TaskUtils.parseTaskId(taskId)
     val jobOption = jobGraph.lookupVertex(jobName)
 
     jobsObserver.apply(JobFailed(jobOption.toRight(jobName), taskStatus, attempt))

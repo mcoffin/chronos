@@ -59,24 +59,6 @@ object TaskUtils {
     }
   }
 
-  /**
-   * Parses the task id into job arguments
-   * @param taskId
-   * @return
-   */
-  def getJobArgumentsForTaskId(taskId: String): String = {
-    require(taskId != null, "taskId cannot be null")
-    try {
-      val TaskUtils.taskIdPattern(_, _, _, jobArguments) = taskId
-      jobArguments
-    } catch {
-      case t: Exception =>
-        log.warning("Unable to parse idStr: '%s' due to a corrupted string or version error. " +
-          "Warning, dependents will not be triggered!")
-        ""
-    }
-  }
-
   def loadTasks(taskManager: TaskManager, persistenceStore: PersistenceStore) {
     val allTasks = persistenceStore.getTasks
     val validTasks = TaskUtils.getDueTimes(allTasks)
@@ -128,8 +110,21 @@ object TaskUtils {
     taskMap.toMap
   }
 
-  def parseTaskId(id: String): (String, Long, Int, String) = {
-    val taskIdPattern(due, attempt, jobName, jobArguments) = id
-    (jobName, due.toLong, attempt.toInt, jobArguments)
+  /**
+   * Parses the non-destructive parts of the task ID
+   *
+   * @note while the job's arguments are put in to the task ID for readability purposes, they can't be reliably parsed out due to possible illegal characters.
+   * @param id
+   * @return
+   */
+  def parseTaskId(id: String): (String, Long, Int) = {
+    // jobArguments are not guaranteed to have retained all of their
+    // characters, so it would be misleading to return them here, as the
+    // version returned will have all slashes replaced with underscores.
+    //
+    // See getTaskId for where the task id's version fo the arguments is
+    // possibly mutated
+    val taskIdPattern(due, attempt, jobName, _) = id
+    (jobName, due.toLong, attempt.toInt)
   }
 }

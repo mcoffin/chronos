@@ -91,9 +91,11 @@ class TaskManager @Inject()(val listeningExecutor: ListeningScheduledExecutorSer
         jobsObserver.apply(JobExpired(jobOption.get, taskId))
         None
       } else {
-        val jobArguments = TaskUtils.getJobArgumentsForTaskId(taskId)
         var job = jobOption.get
+        // Wrap the job's arguments in single-parens and concatenate
+        val jobArguments = job.arguments.mkString(" ")
 
+        // If the job has arguments, fill them in to the job's command
         if (jobArguments != null && !jobArguments.isEmpty) {
           job = JobUtils.getJobWithArguments(job, jobArguments)
         }
@@ -160,7 +162,7 @@ class TaskManager @Inject()(val listeningExecutor: ListeningScheduledExecutorSer
      if (jobOption.isEmpty) {
       log.warning("Job '%s' no longer registered.".format(jobName))
     } else {
-        val (_, _, attempt, _) = TaskUtils.parseTaskId(taskId)
+        val (_, _, attempt) = TaskUtils.parseTaskId(taskId)
         val job = jobOption.get
         jobsObserver.apply(JobQueued(job, taskId, attempt))
     }
